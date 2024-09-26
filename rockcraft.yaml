@@ -62,8 +62,8 @@ parts:
       dpkg-query -f '${db:Status-Abbrev},${binary:Package},${Version},${source:Package},${Source:Version}\n' -W > ${rocks}/dpkg.query
       
       ## for snap packages
-      cp snap.opensearch_dashboards/manifest.yaml ${rocks}
-      cp snap.opensearch_dashboards/snapcraft.yaml ${rocks}
+      cp snap.opensearch-dashboards/manifest.yaml ${rocks}
+      cp snap.opensearch-dashboards/snapcraft.yaml ${rocks}
       
 
   non-root-user:
