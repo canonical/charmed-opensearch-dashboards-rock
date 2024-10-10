@@ -14,7 +14,7 @@ jobs:
     name: Build rock
     uses: canonical/data-platform-workflows/.github/workflows/build_rock.yaml@v22.0.0
     with:
-      artifact-prefix: charmed_opensearch_dashboards_rock_amd64
+      artifact-prefix: charmed_opensearch_dashboards_rock
 
   test:
     name: Test Rock
@@ -29,7 +29,7 @@ jobs:
       - name: Download rock file
         uses: actions/download-artifact@v3
         with:
-          name: charmed_opensearch_dashboards_rock_amd64
+          name: charmed_opensearch_dashboards_rock-architecture-amd64
           path: .
 
       - name: Install required dependencies
@@ -48,12 +48,6 @@ jobs:
         run: |
           version="$(cat rockcraft.yaml | yq .version)"
 
-          sudo skopeo \
-              --insecure-policy \
-              copy \
-              oci-archive:charmed-opensearch_${version}_amd64.rock \
-              docker-daemon:charmed-opensearch:${version}
-          
           sudo skopeo \
               --insecure-policy \
               copy \
