@@ -28,9 +28,8 @@ jobs:
 
       - name: Download rock file
         uses: actions/download-artifact@v4
-        # with:
-        #   name: charmed_opensearch_dashboards_rock-architecture-amd64
-        #   path: .
+        with:
+          name: charmed_opensearch_dashboards_rock-architecture-amd64
       - name: Display structure of downloaded files
         run: ls -R
 
