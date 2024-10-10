@@ -35,8 +35,6 @@ services:
       OPENSEARCH_DASHBOARDS_TMPDIR: /usr/share/tmp
       OPENSEARCH_DASHBOARDS_VARLOG: /var/log/opensearch_dashboards
 
-      KNN_LIB_DIR: /usr/share/opensearch_dashboards/plugins/opensearch_dashboards-knn/lib
-
 parts:
   opensearch_dashboards-snap:
     plugin: nil
@@ -78,7 +76,7 @@ parts:
 
       # Give permission to the required folders
       mkdir -p var/lib/opensearch_dashboards usr/share/tmp var/log/opensearch_dashboards
-      chown -R 1000:1000 etc/opensearch_dashboards opt/opensearch_dashboards usr/share/opensearch_dashboards var/lib/opensearch_dashboards usr/share/tmp var/log/opensearch_dashboards
+      chown -R 1000:1000 etc/opensearch-dashboards opt/opensearch-dashboards usr/share/opensearch-dashboards var/lib/opensearch_dashboards usr/share/tmp var/log/opensearch_dashboards
 
   entry:
     plugin: dump
