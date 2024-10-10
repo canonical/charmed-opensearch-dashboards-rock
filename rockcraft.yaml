@@ -22,14 +22,14 @@ services:
     summary: Start opensearch_dashboards
     command: "/bin/bash /bin/start.sh"
     environment:
-      OPS_ROOT: /opt/opensearch_dashboards
+      OPS_ROOT: /opt/opensearch-dashboards
       OPENSEARCH_DASHBOARDS_HOME: /usr/share/opensearch_dashboards
 
-      OPENSEARCH_DASHBOARDS_BIN: /usr/share/opensearch_dashboards/bin
-      OPENSEARCH_DASHBOARDS_LIB: /usr/share/opensearch_dashboards/lib
+      OPENSEARCH_DASHBOARDS_BIN: /usr/share/opensearch-dashboards/bin
+      OPENSEARCH_DASHBOARDS_LIB: /usr/share/opensearch-dashboards/lib
 
-      OPENSEARCH_DASHBOARDS_PATH_CONF: /etc/opensearch_dashboards
-      OPENSEARCH_DASHBOARDS_PATH_CERTS: /etc/opensearch_dashboards/certificates
+      OPENSEARCH_DASHBOARDS_PATH_CONF: /etc/opensearch-dashboards
+      OPENSEARCH_DASHBOARDS_PATH_CERTS: /etc/opensearch-dashboards/certificates
 
       OPENSEARCH_DASHBOARDS_VARLIB: /var/lib/opensearch_dashboards
       OPENSEARCH_DASHBOARDS_TMPDIR: /usr/share/tmp

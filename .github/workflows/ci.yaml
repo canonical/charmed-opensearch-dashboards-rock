@@ -13,6 +13,8 @@ jobs:
   build:
     name: Build rock
     uses: canonical/data-platform-workflows/.github/workflows/build_rock.yaml@v22.0.0
+    with:
+      artifact-prefix: charmed_opensearch_dashboards_rock_amd64
 
   test:
     name: Test Rock
