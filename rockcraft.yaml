@@ -1,0 +1,89 @@
+# Copyright 2023 Canonical Ltd.
+# See LICENSE file for licensing details.
+name: charmed-opensearch-dashboards  # the name of your ROCK
+base: ubuntu@22.04  # the base environment for this ROCK
+license: Apache-2.0
+
+version: '2.17.0' # just for humans. Semantic versioning is recommended
+
+summary: 'Charmed opensearch-dashboards ROCK OCI.'
+description: |
+    Opensearch Dashboard is a community-driven, Apache 2.0-licensed open source 
+    user interface that lets you visualize your opensearch_dashboards data and run and scale
+    your Opensearch clusters.
+
+platforms: # The platforms this ROCK should be built on and run on
+  amd64:
+
+services:
+  opensearch_dashboards:
+    override: replace
+    startup: enabled
+    summary: Start opensearch_dashboards
+    command: "/bin/bash /bin/start.sh"
+    environment:
+      OPS_ROOT: /opt/opensearch-dashboards
+      OPENSEARCH_DASHBOARDS_HOME: /usr/share/opensearch_dashboards
+
+      OPENSEARCH_DASHBOARDS_BIN: /usr/share/opensearch-dashboards/bin
+      OPENSEARCH_DASHBOARDS_LIB: /usr/share/opensearch-dashboards/lib
+
+      OPENSEARCH_DASHBOARDS_PATH_CONF: /etc/opensearch-dashboards
+      OPENSEARCH_DASHBOARDS_PATH_CERTS: /etc/opensearch-dashboards/certificates
+
+      OPENSEARCH_DASHBOARDS_VARLIB: /var/lib/opensearch_dashboards
+      OPENSEARCH_DASHBOARDS_TMPDIR: /usr/share/tmp
+      OPENSEARCH_DASHBOARDS_VARLOG: /var/log/opensearch_dashboards
+
+parts:
+  opensearch_dashboards-snap:
+    plugin: nil
+    stage-snaps:
+      - opensearch-dashboards/2/edge
+    stage-packages:
+      - curl
+      - python3
+      - python3-yaml
+      - util-linux
+    override-prime: |
+      craftctl default
+      
+      # opensearch_dashboards
+      mkdir -p data
+      mkdir -p extensions
+      
+      # enable security monitoring
+      rocks=usr/share/rocks/
+      mkdir -p ${rocks}
+      
+      ## for deb packages
+      dpkg-query -f '${db:Status-Abbrev},${binary:Package},${Version},${source:Package},${Source:Version}\n' -W > ${rocks}/dpkg.query
+      
+      ## for snap packages
+      cp snap.opensearch-dashboards/manifest.yaml ${rocks}
+      cp snap.opensearch-dashboards/snapcraft.yaml ${rocks}
+      
+
+  non-root-user:
+    plugin: nil
+    after: [opensearch_dashboards-snap]
+    overlay-script: |
+      # Create a user in the $CRAFT_OVERLAY chroot
+      groupadd -R ${CRAFT_OVERLAY} -g 1000 opensearch_dashboards
+      useradd -R ${CRAFT_OVERLAY} -M -r -g opensearch_dashboards -u 1000 opensearch_dashboards
+    override-prime: |
+      craftctl default
+
+      # Give permission to the required folders
+      mkdir -p var/lib/opensearch_dashboards usr/share/tmp var/log/opensearch_dashboards
+      chown -R 1000:1000 etc/opensearch-dashboards opt/opensearch-dashboards usr/share/opensearch-dashboards var/lib/opensearch_dashboards usr/share/tmp var/log/opensearch_dashboards
+
+  entry:
+    plugin: dump
+    source: scripts
+    organize:
+      start.sh: bin/start.sh
+      set_conf.py: bin/set_conf.py
+    stage:
+      - bin/start.sh
+      - bin/set_conf.py
