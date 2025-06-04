@@ -17,6 +17,9 @@ opensearch_dashboards_vars=(
     opensearch_security.enabled
     server.host
     server.port
+    server.ssl.certificate
+    server.ssl.enabled
+    server.ssl.key
 )
 
 OPENSEARCH_DASHBOARDS_CONF="${OPENSEARCH_DASHBOARDS_PATH_CONF}/opensearch_dashboards.yml"
