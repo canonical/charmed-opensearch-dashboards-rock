@@ -40,32 +40,23 @@ version=$(yq .version rockcraft.yaml)
 base=$(yq .base rockcraft.yaml)
 docker pull ghcr.io/canonical/charmed-opensearch:${version}-${base#*@}_edge
 
-docker network create opensearch-net
-
-docker run -d --rm -it \
+opensearch_cont=$(docker run -d --rm \
     --name cm0 \
-    --network opensearch-net \
     -p 127.0.0.1:9200:9200 \
     -e NODE_NAME=cm0 \
     -e INITIAL_CM_NODES=cm0 \
     ghcr.io/canonical/charmed-opensearch:${version}-${base#*@}_edge
 
+opensearch_cont_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${opensearch_cont}")
+
 docker run -d --rm \
-    --name dashboards \
-    --network opensearch-net \
     -p 127.0.0.1:5601:5601 \
     -p 127.0.0.1:9684:9684 \
-    -e OPENSEARCH_HOSTS='["http://cm0:9200"]' \
-    charmed-opensearch-dashboards:${version}
+    -e OPENSEARCH_HOSTS='["http://'"${opensearch_cont_ip}"':9200"]' \
+    charmed-opensearch-dashboards:"${version}"
 ```
-OpenSearch Dashboards will now be accessible at http://localhost:5601. The Prometherus exporter can be reached at http://localhost:9684.
+OpenSearch Dashboards will now be accessible at http://localhost:5601. The Prometheus exporter can be reached at http://localhost:9684.
 
-```
-# clean up resources
-docker stop cm0 dashboards
-docker network rm opensearch-net
-
-```
 ## License:
 The Charmed OpenSearch Dashboards rock is free software, distributed under the Apache Software License, version 2.0. See licenses for 
 more information.
