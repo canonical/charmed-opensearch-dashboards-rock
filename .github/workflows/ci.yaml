@@ -1,0 +1,123 @@
+name: Build and Test
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_call:
+  pull_request:
+
+jobs:
+  build:
+    name: Build Rock
+    runs-on: [self-hosted, linux, X64, jammy, large]
+    timeout-minutes: 30
+    outputs:
+      rock-file: ${{ steps.build-snap.outputs.rock }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup LXD
+        uses: canonical/setup-lxd@main
+
+      - name: Install required dependencies
+        run: |
+          # rockcraft
+          sudo snap install rockcraft --classic --edge
+
+      - name: Build rock
+        run: |
+          rockcraft pack --verbose
+      - name: Upload built rock job artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opensearch_dashboards_rock_amd64
+          path: "opensearch-dashboards_*.rock"
+  test:
+   name: Test Rock
+   runs-on: ubuntu-latest
+   timeout-minutes: 15
+   needs:
+     - build
+   steps:
+     - name: Checkout repo
+       uses: actions/checkout@v4
+
+     - name: Download rock file
+       uses: actions/download-artifact@v4
+       with:
+         name: opensearch_dashboards_rock_amd64
+         path: .
+
+     - name: Install required dependencies
+       run: |
+         sudo snap install docker
+         sudo addgroup --system docker; sudo adduser $USER docker
+         newgrp docker
+         sudo snap disable docker; sudo snap enable docker
+
+         # skopeo
+         sudo apt-get update -y && sudo apt-get install -y skopeo
+         sudo snap install yq
+
+     - name: Pull OpenSearch Rock
+       run: |
+         # opensearch rock
+         version="$(yq .version rockcraft.yaml)"
+         base="$(yq .base rockcraft.yaml)"
+         opensearch_img="ghcr.io/canonical/charmed-opensearch:${version}-${base#*@}_edge"
+         docker pull ${opensearch_img}
+         docker tag ${opensearch_img} charmed-opensearch:${version}
+
+     - name: Create local image
+       run: |
+         version="$(yq .version rockcraft.yaml)"
+         sudo skopeo \
+             --insecure-policy \
+             copy \
+             oci-archive:opensearch-dashboards_${version}_amd64.rock \
+             docker-daemon:opensearch-dashboards:${version}
+
+     - name: Test OpenSearch Dashboards
+       run: |
+         version="$(yq .version rockcraft.yaml)"
+
+         # run opensearch and opensearch dashboards
+         opensearch_cont=$(docker run -d --rm \
+           --name cm0 \
+           -e NODE_NAME=cm0 \
+           -e INITIAL_CM_NODES=cm0 \
+            charmed-opensearch:"${version}"
+         )
+         opensearch_cont_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${opensearch_cont}")
+
+         docker run -d --rm \
+             --name dashboards \
+             -p 127.0.0.1:5601:5601 \
+             -e OPENSEARCH_HOSTS='["http://'"${opensearch_cont_ip}"':9200"]' \
+             opensearch-dashboards:"${version}"
+         
+         sleep 10s
+         
+         # check opensearch dashboards is available
+         service_available=$(curl -s -i "http://localhost:5601" \
+           --connect-timeout 5 \
+           --retry 5 \
+           --retry-delay 5 \
+           --retry-max-time 60 \
+           --retry-connrefused  | grep "302 Found")
+         if [ ! "$service_available" ]; then
+           echo "ERROR: Service unavailable. Aborting..." >&2
+           exit 1
+         fi
+         
+         # Check if logs are collected as expected
+         logfile="/var/log/opensearch-dashboards/opensearch_dashboards.log"
+         if ! docker exec dashboards test -s "${logfile}"; then
+           echo "ERROR: Logfile unaccessible. Aborting..." >&2
+           exit 1
+         fi
