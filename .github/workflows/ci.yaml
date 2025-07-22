@@ -35,8 +35,8 @@ jobs:
       - name: Upload built rock job artifact
         uses: actions/upload-artifact@v4
         with:
-          name: opensearch_dashboards_rock_amd64
-          path: "opensearch-dashboards_*.rock"
+          name: charmed_opensearch_dashboards_rock_amd64
+          path: "charmed-opensearch-dashboards_*.rock"
   test:
    name: Test Rock
    runs-on: ubuntu-latest
@@ -50,7 +50,7 @@ jobs:
      - name: Download rock file
        uses: actions/download-artifact@v4
        with:
-         name: opensearch_dashboards_rock_amd64
+         name: charmed_opensearch_dashboards_rock_amd64
          path: .
 
      - name: Install required dependencies
@@ -79,14 +79,13 @@ jobs:
          sudo skopeo \
              --insecure-policy \
              copy \
-             oci-archive:opensearch-dashboards_${version}_amd64.rock \
-             docker-daemon:opensearch-dashboards:${version}
+             oci-archive:charmed-opensearch-dashboards_${version}_amd64.rock \
+             docker-daemon:charmed-opensearch-dashboards:${version}
 
      - name: Test OpenSearch Dashboards
        run: |
          version="$(yq .version rockcraft.yaml)"
 
-         # run opensearch and opensearch dashboards
          opensearch_cont=$(docker run -d --rm \
            --name cm0 \
            -e NODE_NAME=cm0 \
@@ -99,7 +98,7 @@ jobs:
              --name dashboards \
              -p 127.0.0.1:5601:5601 \
              -e OPENSEARCH_HOSTS='["http://'"${opensearch_cont_ip}"':9200"]' \
-             opensearch-dashboards:"${version}"
+             charmed-opensearch-dashboards:"${version}"
          
          sleep 10s
          
