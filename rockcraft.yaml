@@ -36,7 +36,7 @@ parts:
     opensearch-dashboards-snap:
       plugin: nil
       stage-snaps:
-        - opensearch-dashboards/2/edge
+        - charmed-opensearch-dashboards/2/edge
       stage:
         - "-opt/opensearch-dashboards/helpers"
         - "-opt/opensearch-dashboards/start.sh"
