@@ -26,13 +26,21 @@ sudo lxd init --auto
 ### Packing and Running the rock
 
 ```
-version=$(yq .version rockcraft.yaml)
 rockcraft pack
+
 ROCK=$(echo ./charmed-opensearch-dashboards_*.rock)
-sudo rockcraft.skopeo --insecure-policy copy oci-archive:$ROCK docker-daemon:charmed-opensearch-dashboards:${version}
-docker run --rm -it -p 127.0.0.1:5601:5601 \
-    -e OPENSEARCH_HOSTS='["<your-opensearch-host>:<port>"]' \
-    charmed-opensearch-dashboards:${version}
+version=$(yq .version rockcraft.yaml)
+
+sudo rockcraft.skopeo --insecure-policy \
+  copy \
+  oci-archive:"${ROCK}" \
+  docker-daemon:charmed-opensearch-dashboards:"${version}"
+
+docker run \
+  -d --rm \
+  -p 127.0.0.1:5601:5601 \
+  -e OPENSEARCH_HOSTS='["<your-opensearch-host>:<port>"]' \
+  charmed-opensearch-dashboards:${version}
 ```
 ### Example alongside containerized OpenSearch
 ```
@@ -51,7 +59,7 @@ opensearch_cont_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${ope
 
 docker run -d --rm \
     -p 127.0.0.1:5601:5601 \
-    -e OPENSEARCH_HOSTS='["http://'"${opensearch_cont_ip}"':9200"]' \
+    -e OPENSEARCH_HOSTS='["http://${opensearch_cont_ip}:9200"]' \
     charmed-opensearch-dashboards:"${version}"
 ```
 OpenSearch Dashboards will now be accessible at http://localhost:5601.
