@@ -4,7 +4,7 @@ name: charmed-opensearch-dashboards
 base: ubuntu@24.04 # the base environment for this rock
 license: Apache-2.0
 
-version: '2.19.1' # just for humans. Semantic versioning is recommended
+version: '2.19.2' # just for humans. Semantic versioning is recommended
 
 summary: 'OpenSearch Dashboards: community-driven OpenSearch visualization suite.'
 description: |
@@ -14,6 +14,8 @@ description: |
 
 platforms: # the platforms this rock should be built on and run on
     amd64:
+
+run_user: _daemon_
 
 services:
   opensearch-dashboards:
@@ -44,33 +46,45 @@ parts:
     opensearch-dashboards-snap:
       plugin: nil
       stage-snaps:
-        - opensearch-dashboards/2/edge/dpe-7434
+        - charmed-opensearch-dashboards/2/edge
       stage:
-        - "-opt/opensearch-dashboards"
+        - "-opt/opensearch-dashboards/helpers"
+        - "-opt/opensearch-dashboards/start.sh"
       stage-packages:
         - util-linux
         - python3-venv
         - curl
+      override-prime: |
+        craftctl default
+
+        # enable security monitoring
+        rocks=usr/share/rocks/
+        mkdir -p ${rocks}
+
+        ## for deb packages
+        dpkg-query -f '${db:Status-Abbrev},${binary:Package},${Version},${source:Package},${Source:Version}\n' -W > ${rocks}/dpkg.query
+
+        ## for snap packages
+        cp snap.charmed-opensearch-dashboards/manifest.yaml ${rocks}
+        cp snap.charmed-opensearch-dashboards/snapcraft.yaml ${rocks}
 
     non-root-user:
       plugin: nil
       after: [opensearch-dashboards-snap]
-      overlay-script: |
-        groupadd -R $CRAFT_OVERLAY -g 584792 opensearch_dashboards
-        useradd -R $CRAFT_OVERLAY -M -r -g opensearch_dashboards -u 584792 opensearch_dashboards
       override-prime: |
         craftctl default
 
-        DASHBOARDS_VARLIB="${CRAFT_PRIME}/var/lib/opensearch-dashboards"
-        DASHBOARDS_VARLOG="$CRAFT_PRIME/var/log/opensearch-dashboards"
-        DASHBOARDS_TMPDIR="$CRAFT_PRIME/usr/share/tmp"
-        DASHBOARDS_HOME="${CRAFT_PRIME}/usr/share/opensearch-dashboards" 
+        OSD_PATH_CONF="${CRAFT_PRIME}/etc/opensearch-dashboards"
+        OSD_HOME="${CRAFT_PRIME}/usr/share/opensearch-dashboards" 
+        OSD_VARLIB="${CRAFT_PRIME}/var/lib/opensearch-dashboards"
+        OSD_VARLOG="$CRAFT_PRIME/var/log/opensearch-dashboards"
+        OSD_TMPDIR="$CRAFT_PRIME/usr/share/tmp"
 
-        mkdir -p "${DASHBOARDS_VARLIB}" "${DASHBOARDS_VARLOG}" "${DASHBOARDS_TMPDIR}"
-        chown -R 584792:root "${DASHBOARDS_VARLIB}" "${DASHBOARDS_VARLOG}" "${DASHBOARDS_TMPDIR}" \
+        mkdir -p "${OSD_VARLIB}" "${OSD_VARLOG}" "${OSD_TMPDIR}"
+        chown -R 584792:584792 "${OSD_PATH_CONF}" "${OSD_HOME}" "${OSD_VARLIB}" "${OSD_VARLOG}" "${OSD_TMPDIR}" \
         
-        chmod -R 770 "${DASHBOARDS_VARLIB}" "${DASHBOARDS_VARLOG}" "${DASHBOARDS_TMPDIR}"
-        chmod -R 755 "${DASHBOARDS_HOME}/bin"
+        chmod -R 770 "${OSD_VARLIB}" "${OSD_VARLOG}" "${OSD_TMPDIR}"
+        chmod -R 755 "${OSD_HOME}/bin"
 
     entry:
       plugin: dump

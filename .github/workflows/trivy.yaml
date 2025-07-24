@@ -6,6 +6,7 @@ on:
     branches:
       - 2-24.04/edge
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:

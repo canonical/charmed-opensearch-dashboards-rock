@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eux
+set -e
 source "/usr/bin/set-conf.sh"
 
 opensearch_dashboards_vars=(
@@ -20,6 +20,7 @@ opensearch_dashboards_vars=(
     server.ssl.certificate
     server.ssl.enabled
     server.ssl.key
+
 )
 
 OPENSEARCH_DASHBOARDS_CONF="${OPENSEARCH_DASHBOARDS_PATH_CONF}/opensearch_dashboards.yml"
@@ -44,11 +45,7 @@ function read_env_vars () {
 
 function start_opensearch_dashboards () {
     # start
-    exec /usr/bin/setpriv \
-        --clear-groups \
-        --reuid opensearch_dashboards \
-        --regid opensearch_dashboards -- \
-        "${OPENSEARCH_DASHBOARDS_BIN}"/opensearch-dashboards \
+    exec "${OPENSEARCH_DASHBOARDS_BIN}"/opensearch-dashboards \
         -c "${OPENSEARCH_DASHBOARDS_PATH_CONF}"/opensearch_dashboards.yml \
         -l "${OPENSEARCH_DASHBOARDS_VARLOG}"/opensearch_dashboards.log
 }

@@ -86,6 +86,7 @@ jobs:
        run: |
          version="$(yq .version rockcraft.yaml)"
 
+         # run opensearch and opensearch dashboards
          opensearch_cont=$(docker run -d --rm \
            --name cm0 \
            -e NODE_NAME=cm0 \
