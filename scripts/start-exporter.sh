@@ -20,11 +20,7 @@ function fetch_exporter_args () {
 function start_exporter () {
     OPENSEARCH_DASHBOARDS_USER="${DASHBOARDS_USER}" \
     OPENSEARCH_DASHBOARDS_PASSWORD="${DASHBOARDS_PASSWORD}" \
-    exec /usr/bin/setpriv \
-        --clear-groups \
-        --reuid opensearch_dashboards \
-        --regid opensearch_dashboards -- \
-        /usr/bin/prometheus-opensearch-dashboards-exporter \
+    exec /usr/bin/prometheus-opensearch-dashboards-exporter \
         --url ${SCHEME}://${DASHBOARDS_HOST}:${DASHBOARDS_PORT}
 }
 
