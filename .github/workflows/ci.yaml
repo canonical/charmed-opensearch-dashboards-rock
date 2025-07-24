@@ -137,4 +137,3 @@ jobs:
            echo "ERROR: Prometheus exporter unavailable (connected to OSD on HTTP). Aborting..." >&2
            exit 1
          fi
-
