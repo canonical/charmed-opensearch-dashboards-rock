@@ -98,6 +98,7 @@ jobs:
          docker run -d --rm \
              --name dashboards \
              -p 127.0.0.1:5601:5601 \
+             -p 127.0.0.1:9684:9684 \
              -e OPENSEARCH_HOSTS='["http://'"${opensearch_cont_ip}"':9200"]' \
              charmed-opensearch-dashboards:"${version}"
          
@@ -119,5 +120,20 @@ jobs:
          logfile="/var/log/opensearch-dashboards/opensearch_dashboards.log"
          if ! docker exec dashboards test -s "${logfile}"; then
            echo "ERROR: Logfile unaccessible. Aborting..." >&2
+           exit 1
+         fi
+     - name: Test Prometheus Exporter
+       run: |
+         URL=http://localhost:9684/metrics
+
+         metrics=$(curl ${URL} \
+           --connect-timeout 5 \
+           --retry 5 \
+           --retry-delay 5 \
+           --retry-max-time 60 \
+           --retry-connrefused)
+
+         if [[ "$metrics" ==  *"opensearch_dashboards_up 0.0"* ]]; then
+           echo "ERROR: Prometheus exporter unavailable (connected to OSD on HTTP). Aborting..." >&2
            exit 1
          fi

@@ -59,10 +59,11 @@ opensearch_cont_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${ope
 
 docker run -d --rm \
     -p 127.0.0.1:5601:5601 \
+    -p 127.0.0.1:9684:9684 \
     -e OPENSEARCH_HOSTS='["http://${opensearch_cont_ip}:9200"]' \
     charmed-opensearch-dashboards:"${version}"
 ```
-OpenSearch Dashboards will now be accessible at http://localhost:5601.
+OpenSearch Dashboards will now be accessible at http://localhost:5601. The Prometheus exporter can be reached at http://localhost:9684.
 
 ## License:
 The Charmed OpenSearch Dashboards rock is free software, distributed under the Apache Software License, version 2.0. See licenses for 
