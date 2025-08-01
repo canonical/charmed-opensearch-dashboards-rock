@@ -4,7 +4,7 @@ name: Trivy Security Scanner
 on:
   push:
     branches:
-      - 2-24.04/edge
+      - 3-24.04
   pull_request:
   workflow_dispatch:
 
