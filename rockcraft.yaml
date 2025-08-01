@@ -4,7 +4,7 @@ name: charmed-opensearch-dashboards
 base: ubuntu@24.04 # the base environment for this rock
 license: Apache-2.0
 
-version: '2.19.2' # just for humans. Semantic versioning is recommended
+version: '3.1.0' # just for humans. Semantic versioning is recommended
 
 summary: 'OpenSearch Dashboards: community-driven OpenSearch visualization suite.'
 description: |
@@ -24,7 +24,6 @@ services:
     summary: Start Opensearch Dashboards
     command: '/bin/bash /bin/start.sh'
     environment:
-      OPS_ROOT: /opt/opensearch-dashboards
       OPENSEARCH_DASHBOARDS_HOME: /usr/share/opensearch-dashboards
       OPENSEARCH_DASHBOARDS_BIN: /usr/share/opensearch-dashboards/bin
       OPENSEARCH_DASHBOARDS_PATH_CONF: /etc/opensearch-dashboards
@@ -46,7 +45,7 @@ parts:
     opensearch-dashboards-snap:
       plugin: nil
       stage-snaps:
-        - charmed-opensearch-dashboards/2/edge
+        - charmed-opensearch-dashboards/3/edge
       stage:
         - "-opt/opensearch-dashboards/helpers"
         - "-opt/opensearch-dashboards/start.sh"
