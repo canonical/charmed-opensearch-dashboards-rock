@@ -99,7 +99,7 @@ jobs:
              --name dashboards \
              -p 127.0.0.1:5601:5601 \
              -p 127.0.0.1:9684:9684 \
-             -e OPENSEARCH_HOSTS='["http://'"${opensearch_cont_ip}"':9200"]' \
+             -e OPENSEARCH_HOSTS="[http://${opensearch_cont_ip}:9200]" \
              charmed-opensearch-dashboards:"${version}"
          
          sleep 10s
