@@ -49,7 +49,7 @@ jobs:
           version="$(yq .version rockcraft.yaml)"
           base=$(yq .base rockcraft.yaml)
           base="${base#*@}"
-          tag=${version}-${base}-${{ env.RELEASE }}
+          tag=${version}-${base}_${{ env.RELEASE }}
 
           echo "Publishing charmed-opensearch-dashboards:${tag}"
           sudo rockcraft.skopeo --insecure-policy copy \
