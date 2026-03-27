@@ -4,7 +4,7 @@ name: charmed-opensearch-dashboards
 base: ubuntu@24.04 # the base environment for this rock
 license: Apache-2.0
 
-version: '2.19.2' # just for humans. Semantic versioning is recommended
+version: '2.19.4' # just for humans. Semantic versioning is recommended
 
 summary: 'OpenSearch Dashboards: community-driven OpenSearch visualization suite.'
 description: |
@@ -23,6 +23,8 @@ services:
     startup: enabled
     summary: Start Opensearch Dashboards
     command: '/bin/bash /bin/start.sh'
+    "user": "_daemon_"
+    "group": "_daemon_"
     environment:
       OPS_ROOT: /opt/opensearch-dashboards
       OPENSEARCH_DASHBOARDS_HOME: /usr/share/opensearch-dashboards
@@ -38,6 +40,8 @@ services:
     startup: enabled
     summary: Start Prometheus Exporter
     command: '/bin/bash /bin/start-exporter.sh'
+    user: "_daemon_"
+    group: "_daemon_"
     environment: 
       OPENSEARCH_DASHBOARDS_PATH_CONF: /etc/opensearch-dashboards
       PYTHONPATH: "/usr/lib/python3/dist-packages:$PYTHONPATH"
