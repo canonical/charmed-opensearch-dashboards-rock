@@ -79,13 +79,14 @@ parts:
         craftctl default
 
         OSD_PATH_CONF="${CRAFT_PRIME}/etc/opensearch-dashboards"
+        OSD_PATH_CERT="${CRAFT_PRIME}/etc/opensearch-dashboards/certificates"
         OSD_HOME="${CRAFT_PRIME}/usr/share/opensearch-dashboards" 
         OSD_VARLIB="${CRAFT_PRIME}/var/lib/opensearch-dashboards"
         OSD_VARLOG="$CRAFT_PRIME/var/log/opensearch-dashboards"
         OSD_TMPDIR="$CRAFT_PRIME/usr/share/tmp"
 
-        mkdir -p "${OSD_VARLIB}" "${OSD_VARLOG}" "${OSD_TMPDIR}"
-        chown -R 584792:584792 "${OSD_PATH_CONF}" "${OSD_HOME}" "${OSD_VARLIB}" "${OSD_VARLOG}" "${OSD_TMPDIR}" \
+        mkdir -p "${OSD_VARLIB}" "${OSD_VARLOG}" "${OSD_TMPDIR}" "${OSD_PATH_CERT}"
+        chown -R 584792:584792 "${OSD_PATH_CONF}" "${OSD_HOME}" "${OSD_VARLIB}" "${OSD_VARLOG}" "${OSD_TMPDIR}" "${OSD_PATH_CERT}" \
         
         chmod -R 770 "${OSD_VARLIB}" "${OSD_VARLOG}" "${OSD_TMPDIR}"
         chmod -R 755 "${OSD_HOME}/bin"

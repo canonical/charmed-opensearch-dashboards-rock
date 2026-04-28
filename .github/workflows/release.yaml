@@ -26,10 +26,9 @@ jobs:
           sudo snap install docker
           sudo addgroup --system docker; sudo adduser $USER docker
           newgrp docker
-          sudo snap disable docker; sudo snap enable docker
       - name: Install rockcraft
         run: |
-          sudo snap install rockcraft --classic
+          sudo snap install rockcraft --classic --edge
       - name: Install yq
         run: |
           sudo snap install yq
@@ -52,7 +51,7 @@ jobs:
           tag=${version}-${base}-${{ env.RELEASE }}
 
           echo "Publishing charmed-opensearch-dashboards:${tag}"
-          sudo rockcraft.skopeo --insecure-policy copy \
+          rockcraft.skopeo --insecure-policy copy \
             oci-archive:charmed-opensearch-dashboards_${version}_amd64.rock \
             docker-daemon:ghcr.io/canonical/charmed-opensearch-dashboards:${tag}
           docker push ghcr.io/canonical/charmed-opensearch-dashboards:${tag}
