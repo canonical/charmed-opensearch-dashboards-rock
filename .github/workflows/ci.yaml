@@ -58,10 +58,7 @@ jobs:
          sudo snap install docker
          sudo addgroup --system docker; sudo adduser $USER docker
          newgrp docker
-         sudo snap disable docker; sudo snap enable docker
-
-         # skopeo
-         sudo apt-get update -y && sudo apt-get install -y skopeo
+         sudo snap install rockcraft --classic --edge
          sudo snap install yq
 
      - name: Pull OpenSearch Rock
@@ -76,7 +73,7 @@ jobs:
      - name: Create local image
        run: |
          version="$(yq .version rockcraft.yaml)"
-         sudo skopeo \
+         rockcraft.skopeo \
              --insecure-policy \
              copy \
              oci-archive:charmed-opensearch-dashboards_${version}_amd64.rock \
