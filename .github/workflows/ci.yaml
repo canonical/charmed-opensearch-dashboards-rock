@@ -35,8 +35,8 @@ jobs:
       - name: Upload built rock job artifact
         uses: actions/upload-artifact@v4
         with:
-          name: opensearch_dashboards_rock_amd64
-          path: "opensearch-dashboards_*.rock"
+          name: charmed_opensearch_dashboards_rock_amd64
+          path: "charmed-opensearch-dashboards_*.rock"
   test:
    name: Test Rock
    runs-on: ubuntu-latest
@@ -50,7 +50,7 @@ jobs:
      - name: Download rock file
        uses: actions/download-artifact@v4
        with:
-         name: opensearch_dashboards_rock_amd64
+         name: charmed_opensearch_dashboards_rock_amd64
          path: .
 
      - name: Install required dependencies
@@ -66,7 +66,7 @@ jobs:
          # opensearch rock
          version="$(yq .version rockcraft.yaml)"
          base="$(yq .base rockcraft.yaml)"
-         opensearch_img="ghcr.io/canonical/opensearch:${version}-${base#*@}_edge"
+         opensearch_img="ghcr.io/canonical/charmed-opensearch:${version}-${base#*@}_edge"
          docker pull ${opensearch_img}
          docker tag ${opensearch_img} charmed-opensearch:${version}
 
@@ -76,8 +76,8 @@ jobs:
          rockcraft.skopeo \
              --insecure-policy \
              copy \
-             oci-archive:opensearch-dashboards_${version}_amd64.rock \
-             docker-daemon:opensearch-dashboards:${version}
+             oci-archive:charmed-opensearch-dashboards_${version}_amd64.rock \
+             docker-daemon:charmed-opensearch-dashboards:${version}
 
      - name: Test OpenSearch Dashboards
        run: |
@@ -91,13 +91,20 @@ jobs:
             charmed-opensearch:"${version}"
          )
          opensearch_cont_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${opensearch_cont}")
-
+         
+         cat <<EOF > opensearch_dashboards.yml
+         server.host: "0.0.0.0"
+         opensearch_security.enabled: false
+         path.data: "/var/lib/opensearch-dashboards"
+         opensearch.hosts: ["http://${opensearch_cont_ip}:9200"]
+         EOF
+         
          docker run -d --rm \
              --name dashboards \
              -p 127.0.0.1:5601:5601 \
              -p 127.0.0.1:9684:9684 \
-             -e OPENSEARCH_HOSTS="[http://${opensearch_cont_ip}:9200]" \
-             opensearch-dashboards:"${version}"
+             -v $(pwd)/opensearch_dashboards.yml:/etc/opensearch-dashboards/opensearch_dashboards.yml \
+             charmed-opensearch-dashboards:"${version}"
          
          sleep 10s
          
@@ -119,7 +126,7 @@ jobs:
            echo "ERROR: Logfile unaccessible. Aborting..." >&2
            exit 1
          fi
-     
+
      - name: Test Prometheus Exporter
        run: |
          URL=http://localhost:9684/metrics

@@ -1,6 +1,6 @@
-# OpenSearch Dashboards Rock
+# Charmed OpenSearch Dashboards Rock
 
-This repository contains the packaging metadata for creating an OpenSearch Dashboards rock derived from the [OpenSearch Dashboards Snap](https://github.com/canonical/opensearch-dashboards-snap). For more information on rocks, visit the [rockcraft Github](https://github.com/canonical/rockcraft).
+This repository contains the packaging metadata for creating a Charmed OpenSearch Dashboards rock derived from the [Charmed OpenSearch Dashboards Snap](https://github.com/canonical/opensearch-dashboards-snap). For more information on rocks, visit the [rockcraft Github](https://github.com/canonical/rockcraft).
 
 ## Building the rock
 The steps outlined below are based on the assumption that you are building the rock with the latest LTS of Ubuntu.  
@@ -8,8 +8,8 @@ If you are using another version of Ubuntu or another operating system, the proc
 
 ### Clone Repository
 ```bash
-git clone git@github.com:canonical/opensearch-dashboards-rock.git
-cd opensearch-dashboards-rock
+git clone git@github.com:canonical/charmed-opensearch-dashboards-rock.git
+cd charmed-opensearch-dashboards-rock
 ```
 ### Installing Prerequisites
 ```bash
@@ -28,19 +28,19 @@ sudo lxd init --auto
 ```
 rockcraft pack
 
-ROCK=$(echo ./opensearch-dashboards_*.rock)
+ROCK=$(echo ./charmed-opensearch-dashboards_*.rock)
 version=$(yq .version rockcraft.yaml)
 
 sudo rockcraft.skopeo --insecure-policy \
   copy \
   oci-archive:"${ROCK}" \
-  docker-daemon:opensearch-dashboards:"${version}"
+  docker-daemon:charmed-opensearch-dashboards:"${version}"
 
 docker run \
   -d --rm \
   -p 127.0.0.1:5601:5601 \
   -e OPENSEARCH_HOSTS="[http://<your-opensearch-host>:<port>]" \
-  opensearch-dashboards:${version}
+  charmed-opensearch-dashboards:${version}
 ```
 ### Example alongside containerized OpenSearch
 ```
@@ -61,10 +61,10 @@ docker run -d --rm \
     -p 127.0.0.1:5601:5601 \
     -p 127.0.0.1:9684:9684 \
     -e OPENSEARCH_HOSTS="[http://${opensearch_cont_ip}:9200]" \
-    opensearch-dashboards:${version}
+    charmed-opensearch-dashboards:${version}
 ```
 OpenSearch Dashboards will now be accessible at http://localhost:5601. The Prometheus exporter can be reached at http://localhost:9684.
 
 ## License:
-The OpenSearch Dashboards rock is free software, distributed under the Apache Software License, version 2.0. See licenses for 
+The Charmed OpenSearch Dashboards rock is free software, distributed under the Apache Software License, version 2.0. See licenses for 
 more information.
